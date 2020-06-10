@@ -89,8 +89,6 @@ public class PersistenciaJogo {
 	    String         linha = null;
 	    try {
 	        while((linha = leitor.readLine()) != null) {
-	        	// TODO tirar debug
-	        	System.out.println(":"+linha+":");
 	        	Jogo jogo = criaObjetoJogoFromLinha(linha);
 				this.adicionar(jogo);
 	        }

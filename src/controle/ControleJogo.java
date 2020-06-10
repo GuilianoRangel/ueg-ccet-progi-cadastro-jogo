@@ -1,10 +1,24 @@
 package controle;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import modelo.Jogo;
+import persistencia.PersistenciaJogo;
+import utils.Retorno;
 
 public class ControleJogo {
+	PersistenciaJogo persistencia;
+	
+	public ControleJogo() {
+		this.persistencia = new PersistenciaJogo();
+		try {
+			this.persistencia.lerArquivo();
+		} catch (IOException e) {
+			throw new RuntimeException("Erro ao Ler Arquivo",e);
+		}
+	}
 	
 	/**
 	 * Método utilizado para adicionar um novo jogo
@@ -12,9 +26,18 @@ public class ControleJogo {
 	 * @return - retorna true se tudo ocorreu bem na hora de salvar.
 	 * retorna false caso tenha tido algum problema na hora de adicionar.
 	 */
-	public boolean adicionar(Jogo jogo) {
-	
-		return false;
+	public Retorno adicionar(Jogo jogo) {
+		if(jogo.getNome() == null || jogo.getNome().equals("")) {
+			return new Retorno(false, "Campo Nome do Jogo é obrigatório!");
+		}
+		this.persistencia.adicionar(jogo);
+		try {
+			this.persistencia.gravarArquivo();
+		} catch (IOException e) {
+			this.persistencia.remover(jogo);
+			return new Retorno(false, "Erro ao Gravar dados!\nDetalhe erro:"+e.getMessage());			
+		}
+		return new Retorno(true, "Jogo adicionado com Sucesso");
 	}
 	
 	/**
@@ -33,8 +56,8 @@ public class ControleJogo {
 	 * @return lista de Jogos.
 	 */
 	public List<Jogo> listarTodos(){
-	
-		return null;
+		List<Jogo> lista = this.persistencia.getJogos();
+		return lista;
 	}
 	
 	/**

@@ -1,12 +1,19 @@
 package visao;
 
+import java.util.List;
 import java.util.Scanner;
 
 import controle.ControleJogo;
 import modelo.Jogo;
+import utils.Retorno;
 
 public class VisaoJogo {
 	public static int NUMERO_OPCAO_MENU = 5;
+	private ControleJogo ctrl;
+	
+	public VisaoJogo() {
+		this.ctrl = new ControleJogo();
+	}
 	
 	public int lerInteiro() {
 		Scanner leitor = new Scanner(System.in);		
@@ -26,10 +33,13 @@ public class VisaoJogo {
 		valor = leitor.nextLong();
 		return valor;
 	}	
-	public boolean lerBoolean() {
+	public Boolean lerBoolean() {
 		Scanner leitor = new Scanner(System.in);
-		boolean valor = false;
+		Boolean valor = false;
 		String valorAux = leitor.nextLine();
+		
+		if(valorAux.equals("")){ return null; }
+		
 		if(valorAux.equalsIgnoreCase("Sim") ||
 		   valorAux.equalsIgnoreCase("Verdadeiro") ||
 		   valorAux.equalsIgnoreCase("true") ||
@@ -41,6 +51,9 @@ public class VisaoJogo {
 		return valor;
 	}
 	public int escolherOpcao() {
+		return this.escolherOpcao(NUMERO_OPCAO_MENU);
+	}
+	public int escolherOpcao(int numeroMaximoOpcoes) {
 		int opcao = -1;
 		
 		print("Digite uma opção:");
@@ -48,13 +61,13 @@ public class VisaoJogo {
 		do {
 			try {
 				opcao = lerInteiro();
-				if(!isOpcaoValida(opcao)) {
-					print("Opção incorreta, digite opcao entre 0 e "+NUMERO_OPCAO_MENU+".");
+				if(!isOpcaoValida(opcao,numeroMaximoOpcoes)) {
+					print("Opção incorreta, digite opcao entre 0 e "+numeroMaximoOpcoes+".");
 				}
 			} catch (Exception e) {
 				print("Erro ao ler opção, redigite.");
 			}
-		} while (!isOpcaoValida(opcao));
+		} while (!isOpcaoValida(opcao,numeroMaximoOpcoes));
 		return opcao;
 	}
 
@@ -64,7 +77,15 @@ public class VisaoJogo {
 	 * @return true se valido, false caso contrário.
 	 */
 	public boolean isOpcaoValida(int opcao) {
-		return !(opcao<0 || opcao > NUMERO_OPCAO_MENU);
+		return isOpcaoValida(opcao, NUMERO_OPCAO_MENU);
+	}
+	/**
+	 * retorna se a opção informado (número) é uma opção de menu valida
+	 * @param opcao - número da opção
+	 * @return true se valido, false caso contrário.
+	 */
+	public boolean isOpcaoValida(int opcao, int numMaximoOpcoes) {
+		return !(opcao<0 || opcao > numMaximoOpcoes);
 	}
 	
 	public void desenharMenu() {
@@ -105,7 +126,20 @@ public class VisaoJogo {
 	}
 
 	private void alterarJogo() {
-		// TODO Auto-generated method stub
+		this.listarTodos();
+		print("Digite o número do jogo como opção (0 para voltar:");
+		int total = this.ctrl.listarTodos().size();
+		int op = this.escolherOpcao(total);
+		if(op == 0 ) { return ; };
+		
+		List<Jogo> lista = this.ctrl.listarTodos();
+		Jogo j = lista.get(op-1);
+		/*
+		 * for(int i = 0; i < lista.size(); i++ ) { j = lista.get(i); if(i+1 == op ) {
+		 * break; } }
+		 */
+		print("Jogo: "+j);
+		Jogo jogo = lerJogo(j);
 		
 	}
 
@@ -115,21 +149,28 @@ public class VisaoJogo {
 	}
 
 	private void incluirJogo() {
-		Jogo jogo = lerJogo();
-		ControleJogo ctrl = new ControleJogo();
-		boolean ok = ctrl.adicionar(jogo);
+		Jogo jogo = lerJogo(null);
 		
+		Retorno ok = this.ctrl.adicionar(jogo);
+		// TODO tratar o erro para não perder o que foi digitado e pedir
+		// para digitar o que faltou.
+		if(!ok.isSucesso()) {
+			print("Ocorreu um problema ao inclui o Jogo!");
+			print("Erro: "+ok.getMensagem());
+		}else {
+			print(ok.getMensagem());
+		}		
+	}
+	public Jogo lerJogo(Jogo pJogo) {
+		print("Tela de inclusão do Jogo:");
 		
-		if(!ok) {
-			print("Ocorreu um problema ao inclui o Jogo:");
-			//TODO Devemos fazer alguma coisa aqui após indentificar o problema.
+		if(pJogo != null) {
+			print("Digite Enter para manter os Valores Atuais!");
 		}
 		
-		print("Jogo: "+jogo);
-			
-	}
-	public Jogo lerJogo() {
-		print("Tela de inclusão do Jogo:");		
+		if(pJogo !=null && pJogo.getNome() != null && !pJogo.getNome().equals("") ){
+			print("Nome Atual: "+pJogo.getNome());
+		}
 		
 		print("Digite o nome do Jogo:");
 		String nomeJogo = lerString();
@@ -147,16 +188,26 @@ public class VisaoJogo {
 		Integer anoLancamento = lerInteiroValido();
 		
 		print("O jogo é Multiplayer(Sim ou Não):");
-		boolean multiplayer = lerBoolean();
+		Boolean multiplayer = lerBoolean();
 		
 		print("É possível Jogar Online? (Sim ou Não):");
-		boolean online = lerBoolean();
+		Boolean online = lerBoolean();
 		
 		print("Digite a Idade mínima para jogar: ");
 		Integer classificaoIndicativa = lerInteiroValido();
 		
-		Jogo jogo = new Jogo(nomeJogo, descricaoJogo, generoJogo, tamanhoInstalador, 
+		Jogo jogo; 
+		if(pJogo == null ) {
+			jogo = new Jogo(nomeJogo, descricaoJogo, generoJogo, tamanhoInstalador, 
 				anoLancamento, multiplayer, online, classificaoIndicativa);
+		}else {
+			jogo = pJogo;
+			if(!nomeJogo.equals("")) {
+				jogo.setNome(nomeJogo);
+			}
+		}
+		// TODO remover debug
+		print("Jogo após leitura:"+jogo);
 		return jogo;
 	}
 	public Long lerLongValido() {
@@ -189,7 +240,16 @@ public class VisaoJogo {
 	}
 
 	private void listarTodos() {
-		// TODO Auto-generated method stub
+		print("Lista de todos Jogos Cadastrados");
+		List<Jogo> lista = this.ctrl.listarTodos();
+		print("------------------------------------------------------");
+		for(int i = 0; i< lista.size(); i++) {
+			Jogo j = lista.get(i);
+			print((i+1)+":\t Nome:"+j.getNome()+ "("+j.getGenero()+") - Ano: "+j.getAnoLancamento());
+			print("\t Descrição: "+j.getDescricao());
+			print("\t Classificação Indicativa: "+j.getClassificaoIndicativa());
+			print("------------------------------------------------------");
+		}
 		
 	}
 
