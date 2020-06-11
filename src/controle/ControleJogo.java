@@ -27,9 +27,9 @@ public class ControleJogo {
 	 * retorna false caso tenha tido algum problema na hora de adicionar.
 	 */
 	public Retorno adicionar(Jogo jogo) {
-		if(jogo.getNome() == null || jogo.getNome().equals("")) {
-			return new Retorno(false, "Campo Nome do Jogo é obrigatório!");
-		}
+		Retorno rt = validarJogo(jogo);
+		if(!rt.isSucesso()) { return rt; };
+		
 		this.persistencia.adicionar(jogo);
 		try {
 			this.persistencia.gravarArquivo();
@@ -38,6 +38,13 @@ public class ControleJogo {
 			return new Retorno(false, "Erro ao Gravar dados!\nDetalhe erro:"+e.getMessage());			
 		}
 		return new Retorno(true, "Jogo adicionado com Sucesso");
+	}
+	
+	public Retorno validarJogo(Jogo jogo) {
+		if(jogo.getNome() == null || jogo.getNome().trim().equals("")) {
+			return new Retorno(false, "Campo Nome do Jogo é obrigatório!");
+		}
+		return new Retorno(true, "Jogo Válido");
 	}
 	
 	/**
@@ -82,8 +89,27 @@ public class ControleJogo {
 	 * @param jogoAlterado - dados do jogo que serão gravados.
 	 * @return
 	 */
-	public boolean alterar(String nomeAntigoDoJogo, Jogo jogoAlterado) {
+	public Retorno alterar(String nomeAntigoDoJogo, Jogo jogoAlterado) {
+
+		Retorno rt = validarJogo(jogoAlterado);
+		if(!rt.isSucesso()) { return rt; }; 
 		
-		return false;
+		List<Jogo> listaJogos = this.persistencia.getJogos();
+		
+		for(int i = 0; i< listaJogos.size(); i++) {
+			Jogo auxJogo = listaJogos.get(i);
+			if(auxJogo.getNome().equals(nomeAntigoDoJogo)) {
+				this.persistencia.getJogos().set(i, jogoAlterado);
+				
+				try {
+					this.persistencia.gravarArquivo();
+				} catch (IOException e) {
+					this.persistencia.getJogos().set(i, auxJogo);
+					return new Retorno(false, "Erro ao Salvar a Alteração do jogo: "+e.getMessage());
+				}
+				return new Retorno(true, "Jogo Alterado com sucesso!");
+			}
+		}		
+		return new Retorno(false, "Jogo não encontroado na lista de Jogos!");
 	}
 }

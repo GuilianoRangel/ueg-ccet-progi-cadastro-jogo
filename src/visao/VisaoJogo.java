@@ -15,10 +15,12 @@ public class VisaoJogo {
 		this.ctrl = new ControleJogo();
 	}
 	
-	public int lerInteiro() {
+	public Integer lerInteiro() {
 		Scanner leitor = new Scanner(System.in);		
 		int valor = 0;
-		valor = leitor.nextInt();
+		String auxValor = leitor.nextLine();
+		if(auxValor.equals("")) { return null; }
+		valor = Integer.valueOf(auxValor);
 		return valor;
 	}
 	public String lerString() {
@@ -27,10 +29,12 @@ public class VisaoJogo {
 		valor = leitor.nextLine();
 		return valor;
 	}
-	public long lerLong() {
+	public Long lerLong() {
 		Scanner leitor = new Scanner(System.in);
-		long valor = 0L;
-		valor = leitor.nextLong();
+		Long valor = null;
+		String auxValor = leitor.nextLine();
+		if(auxValor.equals("")) { return null; }
+		valor = Long.valueOf(auxValor);		
 		return valor;
 	}	
 	public Boolean lerBoolean() {
@@ -134,12 +138,30 @@ public class VisaoJogo {
 		
 		List<Jogo> lista = this.ctrl.listarTodos();
 		Jogo j = lista.get(op-1);
+		String nomeAntigo = j.getNome();
 		/*
 		 * for(int i = 0; i < lista.size(); i++ ) { j = lista.get(i); if(i+1 == op ) {
 		 * break; } }
 		 */
 		print("Jogo: "+j);
-		Jogo jogo = lerJogo(j);
+		boolean erro = true;
+		
+		do {	
+			j = lerJogo(j);
+
+			Retorno rt = this.ctrl.alterar(nomeAntigo, j);
+			if (rt.isSucesso()) {
+				print(rt.getMensagem());
+				erro = false;
+			} else {
+				print("ERRO ao Altera:" + rt.getMensagem());
+				print("Deseja corrigir os dados (1-sim,0-não)?");
+				int opCorrigir = this.escolherOpcao(1);
+				if(opCorrigir == 0) {
+					erro = false;
+				}
+			}
+		} while (erro);
 		
 	}
 
@@ -161,53 +183,83 @@ public class VisaoJogo {
 			print(ok.getMensagem());
 		}		
 	}
+	
+	public String lerDadosString(String valorAtual, String nomeAtributo) {
+		if(valorAtual != null && !valorAtual.equals("") ) {
+			print(nomeAtributo + " atual:"+ valorAtual);			
+		}
+		print(nomeAtributo+ ":");
+		String valor = lerString();
+		if(valor.equals("")) {
+			valor = valorAtual;
+		}
+		return valor;
+	}
+	
+	public Long lerDadosLong(Long valorAtual, String nomeAtributo) {
+		if(valorAtual != null ) {
+			print(nomeAtributo + " atual:"+ valorAtual);			
+		}
+		print(nomeAtributo+ ":");
+		Long valor = lerLongValido();
+		if(valor == null) {
+			valor = valorAtual;
+		}
+		return valor;
+	}
+	
+	public Integer lerDadosInteger(Integer valorAtual, String nomeAtributo) {
+		if(valorAtual != null ) {
+			print(nomeAtributo + " atual:"+ valorAtual);			
+		}
+		print(nomeAtributo+ ":");
+		Integer valor = lerInteiroValido();
+		if(valor == null) {
+			valor = valorAtual;
+		}
+		return valor;
+	}
+	
+	public Boolean lerDadosBoolean(Boolean valorAtual, String nomeAtributo) {
+		if(valorAtual != null ) {
+			print(nomeAtributo + " atual:"+ valorAtual);			
+		}
+		print(nomeAtributo+ ":");
+		Boolean valor = lerBoolean();
+		if(valor == null) {
+			valor = valorAtual;
+		}
+		return valor;
+	}
+	
 	public Jogo lerJogo(Jogo pJogo) {
-		print("Tela de inclusão do Jogo:");
+		print("Tela de preenchimento do Jogo:");
 		
 		if(pJogo != null) {
 			print("Digite Enter para manter os Valores Atuais!");
 		}
 		
-		if(pJogo !=null && pJogo.getNome() != null && !pJogo.getNome().equals("") ){
-			print("Nome Atual: "+pJogo.getNome());
-		}
+		String nomeJogo = lerDadosString(pJogo!=null?pJogo.getNome():"", "Nome");
 		
-		print("Digite o nome do Jogo:");
-		String nomeJogo = lerString();
+		String descricaoJogo = lerDadosString(pJogo!=null?pJogo.getDescricao():"", "Descrição");
 		
-		print("Digite a descrição do Jogo:");
-		String descricaoJogo = lerString();
+		String generoJogo = lerDadosString(pJogo!=null?pJogo.getGenero():"","Genero");
 		
-		print("Digite o nome do Genero:");
-		String generoJogo = lerString();
+		Long tamanhoInstalador = lerDadosLong(pJogo!=null?pJogo.getTamanhoInstalador():null,"Tamanho do Instalador");
 		
-		print("Digite o Tamanho do Instalador:");
-		Long tamanhoInstalador = lerLongValido();
+		Integer anoLancamento = lerDadosInteger(pJogo!=null?pJogo.getAnoLancamento():null,"Ano de lancamento");
 		
-		print("Digite o ano de lancamento:");
-		Integer anoLancamento = lerInteiroValido();
+		Boolean multiplayer = lerDadosBoolean(pJogo!=null?pJogo.isMultiplayer():null, "Multiplayer(Sim ou Não)");
+				
+		Boolean online = lerDadosBoolean(pJogo!=null?pJogo.isOnline():null, "É possível Jogar Online? (Sim ou Não)");
 		
-		print("O jogo é Multiplayer(Sim ou Não):");
-		Boolean multiplayer = lerBoolean();
-		
-		print("É possível Jogar Online? (Sim ou Não):");
-		Boolean online = lerBoolean();
-		
-		print("Digite a Idade mínima para jogar: ");
-		Integer classificaoIndicativa = lerInteiroValido();
+		Integer classificaoIndicativa = lerDadosInteger(pJogo!=null?pJogo.getClassificaoIndicativa():null, "Idade mínima para jogar");
 		
 		Jogo jogo; 
-		if(pJogo == null ) {
-			jogo = new Jogo(nomeJogo, descricaoJogo, generoJogo, tamanhoInstalador, 
-				anoLancamento, multiplayer, online, classificaoIndicativa);
-		}else {
-			jogo = pJogo;
-			if(!nomeJogo.equals("")) {
-				jogo.setNome(nomeJogo);
-			}
-		}
-		// TODO remover debug
-		print("Jogo após leitura:"+jogo);
+
+		jogo = new Jogo(nomeJogo, descricaoJogo, generoJogo, tamanhoInstalador, 
+			anoLancamento, multiplayer, online, classificaoIndicativa);
+		
 		return jogo;
 	}
 	public Long lerLongValido() {
@@ -218,7 +270,7 @@ public class VisaoJogo {
 			}catch(Exception e) {
 				print("Número Inválido, digite um valor numérico:");
 			}			
-		}while (tamanhoInstalador == -1L);
+		}while (tamanhoInstalador !=null && tamanhoInstalador == -1L);
 		return tamanhoInstalador;
 	}
 	
@@ -230,7 +282,7 @@ public class VisaoJogo {
 			}catch(Exception e) {
 				print("Número Inválido, digite um valor numérico:");
 			}			
-		}while (valor == -1);
+		}while (valor !=null && valor == -1);
 		return valor;
 	}
 
