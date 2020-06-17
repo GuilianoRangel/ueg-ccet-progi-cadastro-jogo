@@ -54,8 +54,23 @@ public class ControleJogo {
 	 * retorna false se houve algum problema durante a remoção do jogo.
 	 */
 	public boolean remover(Jogo jogo) {
+		// validarRemocao(
+		int posicao = this.getJogoPosicao(jogo);
+		boolean ok = false;
+		if(posicao == -1) {
+			return ok;
+		}
+		Jogo auxJogo = this.persistencia.getJogos().get(posicao);
+		ok = this.persistencia.remover(posicao);
 		
-		return false;
+		try {
+			this.persistencia.gravarArquivo();
+		} catch (IOException e) {
+			this.persistencia.adicionar(auxJogo);
+			ok =  false;
+		}
+		
+		return ok;
 	}
 	
 	/**
@@ -93,23 +108,45 @@ public class ControleJogo {
 
 		Retorno rt = validarJogo(jogoAlterado);
 		if(!rt.isSucesso()) { return rt; }; 
-		
-		List<Jogo> listaJogos = this.persistencia.getJogos();
-		
-		for(int i = 0; i< listaJogos.size(); i++) {
-			Jogo auxJogo = listaJogos.get(i);
-			if(auxJogo.getNome().equals(nomeAntigoDoJogo)) {
-				this.persistencia.getJogos().set(i, jogoAlterado);
 				
+		int posicao = getJogoPosicaoByName(nomeAntigoDoJogo);
+		if(posicao != -1) {
+				Jogo auxJogo = this.persistencia.getJogos().get(posicao);
+				this.persistencia.getJogos().set(posicao, jogoAlterado);				
 				try {
 					this.persistencia.gravarArquivo();
 				} catch (IOException e) {
-					this.persistencia.getJogos().set(i, auxJogo);
+					this.persistencia.getJogos().set(posicao, auxJogo);
 					return new Retorno(false, "Erro ao Salvar a Alteração do jogo: "+e.getMessage());
 				}
 				return new Retorno(true, "Jogo Alterado com sucesso!");
-			}
 		}		
 		return new Retorno(false, "Jogo não encontroado na lista de Jogos!");
+	}
+	
+	private int getJogoPosicaoByName(String nome) {
+		Jogo auxJogo = new Jogo();
+		auxJogo.setNome(nome);
+		return getJogoPosicao(auxJogo);
+	}
+	/**
+	 * Retorna a posição do jogo informado, sendo feito a busca pelo nome(no sensitive case) do jogo
+	 * @param jogo - jogo que contem o nome da ser buscado
+	 * @return -1 se o jogo não foi encontrado, ou a posição do jogo na lista.
+	 */
+	private int getJogoPosicao(Jogo jogo) {
+		List<Jogo> listaJogos = this.persistencia.getJogos();
+
+		int retorno = -1; 
+		
+		for (int i = 0; i < listaJogos.size(); i++) {
+			Jogo auxJogo = listaJogos.get(i);
+			if (auxJogo.getNome().equalsIgnoreCase(jogo.getNome())) {
+				retorno = i;
+				break;
+			}
+		}
+		
+		return retorno;
 	}
 }

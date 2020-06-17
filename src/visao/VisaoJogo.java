@@ -58,20 +58,23 @@ public class VisaoJogo {
 		return this.escolherOpcao(NUMERO_OPCAO_MENU);
 	}
 	public int escolherOpcao(int numeroMaximoOpcoes) {
+		return this.escolherOpcao("Digite uma opção:", numeroMaximoOpcoes);
+	}
+	public int escolherOpcao(String mensagem, int numeroMaximoOpcoes) {
 		int opcao = -1;
-		
-		print("Digite uma opção:");
-		
+
+		println(mensagem);
+
 		do {
 			try {
 				opcao = lerInteiro();
-				if(!isOpcaoValida(opcao,numeroMaximoOpcoes)) {
-					print("Opção incorreta, digite opcao entre 0 e "+numeroMaximoOpcoes+".");
+				if (!isOpcaoValida(opcao, numeroMaximoOpcoes)) {
+					println("Valor incorreto, digite valor entre 0 e " + numeroMaximoOpcoes + ".");
 				}
 			} catch (Exception e) {
-				print("Erro ao ler opção, redigite.");
+				println("Erro ao ler valor, redigite.");
 			}
-		} while (!isOpcaoValida(opcao,numeroMaximoOpcoes));
+		} while (!isOpcaoValida(opcao, numeroMaximoOpcoes));
 		return opcao;
 	}
 
@@ -93,14 +96,14 @@ public class VisaoJogo {
 	}
 	
 	public void desenharMenu() {
-		print("Escolha uma das opções para trabalhar:");
-		print("1-Para listar todos os jogos.");
-		print("2-Para pesquisar um jogo.");
-		print("3-Incluir novo Jogo.");
-		print("4-Remover jogo.");
-		print("5-Alterar um jogo.");
-		print("6-Testar jogo.");
-		print("0-Sair do sistema.");
+		println("Escolha uma das opções para trabalhar:");
+		println("1-Para listar todos os jogos.");
+		println("2-Para pesquisar um jogo.");
+		println("3-Incluir novo Jogo.");
+		println("4-Remover jogo.");
+		println("5-Alterar um jogo.");
+		println("6-Testar jogo.");
+		println("0-Sair do sistema.");
 	}
 	
 	public void inicializarSistema() {
@@ -113,7 +116,7 @@ public class VisaoJogo {
 	}
 	
 	public void processar(int opcaoEscolhida) {
-		print("Opcao Escolhida: "+opcaoEscolhida);
+		println("Opcao Escolhida: "+opcaoEscolhida);
 		switch(opcaoEscolhida) {
 			case(1): listarTodos();	break;
 			case(2): pesquisarJogo(); break;
@@ -131,9 +134,8 @@ public class VisaoJogo {
 
 	private void alterarJogo() {
 		this.listarTodos();
-		print("Digite o número do jogo como opção (0 para voltar:");
 		int total = this.ctrl.listarTodos().size();
-		int op = this.escolherOpcao(total);
+		int op = this.escolherOpcao("Digite o número do jogo para alterar (0 para voltar):",total);
 		if(op == 0 ) { return ; };
 		
 		List<Jogo> lista = this.ctrl.listarTodos();
@@ -143,7 +145,7 @@ public class VisaoJogo {
 		 * for(int i = 0; i < lista.size(); i++ ) { j = lista.get(i); if(i+1 == op ) {
 		 * break; } }
 		 */
-		print("Jogo: "+j);
+		println("Jogo: "+j);
 		boolean erro = true;
 		
 		do {	
@@ -151,11 +153,11 @@ public class VisaoJogo {
 
 			Retorno rt = this.ctrl.alterar(nomeAntigo, j);
 			if (rt.isSucesso()) {
-				print(rt.getMensagem());
+				println(rt.getMensagem());
 				erro = false;
 			} else {
-				print("ERRO ao Altera:" + rt.getMensagem());
-				print("Deseja corrigir os dados (1-sim,0-não)?");
+				println("ERRO ao Altera:" + rt.getMensagem());
+				println("Deseja corrigir os dados (1-sim,0-não)?");
 				int opCorrigir = this.escolherOpcao(1);
 				if(opCorrigir == 0) {
 					erro = false;
@@ -166,8 +168,28 @@ public class VisaoJogo {
 	}
 
 	private void removerJogo() {
-		// TODO Auto-generated method stub
+		clearScreen();
+		this.listarTodos();
+		int total = this.ctrl.listarTodos().size();
+		int op = this.escolherOpcao("Digite o número do jogo para remover (0 para voltar):",total);
+		if(op == 0 ) { return ; };
 		
+		List<Jogo> lista = this.ctrl.listarTodos();
+		Jogo j = lista.get(op-1);
+		clearScreen();
+		println("Confirme os dados do Jogo a remover!");
+		
+		imprimirJogo(j, true);
+		
+		op = this.escolherOpcao("Confirmar Exclusão (1-Sim, 0-Não):",1);
+		if(op == 1) {
+			boolean ok = this.ctrl.remover(j);
+			if(ok) {
+				println("Remoção realizada com sucesso!");
+			}else {
+				println("Erro ao Remover!");
+			}
+		}		
 	}
 
 	private void incluirJogo() {
@@ -177,18 +199,18 @@ public class VisaoJogo {
 		// TODO tratar o erro para não perder o que foi digitado e pedir
 		// para digitar o que faltou.
 		if(!ok.isSucesso()) {
-			print("Ocorreu um problema ao inclui o Jogo!");
-			print("Erro: "+ok.getMensagem());
+			println("Ocorreu um problema ao inclui o Jogo!");
+			println("Erro: "+ok.getMensagem());
 		}else {
-			print(ok.getMensagem());
+			println(ok.getMensagem());
 		}		
 	}
 	
 	public String lerDadosString(String valorAtual, String nomeAtributo) {
 		if(valorAtual != null && !valorAtual.equals("") ) {
-			print(nomeAtributo + " atual:"+ valorAtual);			
+			println(nomeAtributo + " atual:"+ valorAtual);			
 		}
-		print(nomeAtributo+ ":");
+		println(nomeAtributo+ ":");
 		String valor = lerString();
 		if(valor.equals("")) {
 			valor = valorAtual;
@@ -198,9 +220,9 @@ public class VisaoJogo {
 	
 	public Long lerDadosLong(Long valorAtual, String nomeAtributo) {
 		if(valorAtual != null ) {
-			print(nomeAtributo + " atual:"+ valorAtual);			
+			println(nomeAtributo + " atual:"+ valorAtual);			
 		}
-		print(nomeAtributo+ ":");
+		println(nomeAtributo+ ":");
 		Long valor = lerLongValido();
 		if(valor == null) {
 			valor = valorAtual;
@@ -210,9 +232,9 @@ public class VisaoJogo {
 	
 	public Integer lerDadosInteger(Integer valorAtual, String nomeAtributo) {
 		if(valorAtual != null ) {
-			print(nomeAtributo + " atual:"+ valorAtual);			
+			println(nomeAtributo + " atual:"+ valorAtual);			
 		}
-		print(nomeAtributo+ ":");
+		println(nomeAtributo+ ":");
 		Integer valor = lerInteiroValido();
 		if(valor == null) {
 			valor = valorAtual;
@@ -222,9 +244,9 @@ public class VisaoJogo {
 	
 	public Boolean lerDadosBoolean(Boolean valorAtual, String nomeAtributo) {
 		if(valorAtual != null ) {
-			print(nomeAtributo + " atual:"+ valorAtual);			
+			println(nomeAtributo + " atual:"+ valorAtual);			
 		}
-		print(nomeAtributo+ ":");
+		println(nomeAtributo+ ":");
 		Boolean valor = lerBoolean();
 		if(valor == null) {
 			valor = valorAtual;
@@ -233,10 +255,10 @@ public class VisaoJogo {
 	}
 	
 	public Jogo lerJogo(Jogo pJogo) {
-		print("Tela de preenchimento do Jogo:");
+		println("Tela de preenchimento do Jogo:");
 		
 		if(pJogo != null) {
-			print("Digite Enter para manter os Valores Atuais!");
+			println("Digite Enter para manter os Valores Atuais!");
 		}
 		
 		String nomeJogo = lerDadosString(pJogo!=null?pJogo.getNome():"", "Nome");
@@ -268,7 +290,7 @@ public class VisaoJogo {
 			try {
 				tamanhoInstalador = lerLong();
 			}catch(Exception e) {
-				print("Número Inválido, digite um valor numérico:");
+				println("Número Inválido, digite um valor numérico:");
 			}			
 		}while (tamanhoInstalador !=null && tamanhoInstalador == -1L);
 		return tamanhoInstalador;
@@ -280,7 +302,7 @@ public class VisaoJogo {
 			try {
 				valor = lerInteiro();
 			}catch(Exception e) {
-				print("Número Inválido, digite um valor numérico:");
+				println("Número Inválido, digite um valor numérico:");
 			}			
 		}while (valor !=null && valor == -1);
 		return valor;
@@ -292,21 +314,38 @@ public class VisaoJogo {
 	}
 
 	private void listarTodos() {
-		print("Lista de todos Jogos Cadastrados");
+		println("Lista de todos Jogos Cadastrados");
 		List<Jogo> lista = this.ctrl.listarTodos();
-		print("------------------------------------------------------");
+		println("------------------------------------------------------");
 		for(int i = 0; i< lista.size(); i++) {
 			Jogo j = lista.get(i);
-			print((i+1)+":\t Nome:"+j.getNome()+ "("+j.getGenero()+") - Ano: "+j.getAnoLancamento());
-			print("\t Descrição: "+j.getDescricao());
-			print("\t Classificação Indicativa: "+j.getClassificaoIndicativa());
-			print("------------------------------------------------------");
+			print((i+1)+":");
+			imprimirJogo(j, false);
+			println("------------------------------------------------------");
 		}
 		
 	}
+	
+	private void imprimirJogo(Jogo jogo, boolean detalhada) {
+		println("\t Nome: "+jogo.getNome()+ "("+jogo.getGenero()+") - Ano: "+jogo.getAnoLancamento());
+		if (detalhada) {
+			println("\t Descrição: " + jogo.getDescricao());
+			println("\t Classificação Indicativa: " + jogo.getClassificaoIndicativa());
+		}
+	}
 
-	public void print(String valor) {
+	public void println(String valor) {
 		System.out.println(valor);
+	}
+	public void print(String valor) {
+		System.out.print(valor);
+	}
+	
+	public static void clearScreen() {
+		for(int i=0;i<=50;i++) {
+			System.out.print("\n");
+		}
+
 	}
 	
 	public static void main(String[] args) {
