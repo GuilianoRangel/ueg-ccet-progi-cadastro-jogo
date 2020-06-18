@@ -27,12 +27,12 @@ public class Jogo {
 	/**
 	 * Indica se o jogo suporte jogo multiplayer
 	 */
-	private boolean multiplayer;
+	private Boolean multiplayer;
 	
 	/**
 	 * Indica se o jogo pode ser jogado on-line
 	 */
-	private boolean online;
+	private Boolean online;
 	
 	/**
 	 * indica a idade mínima recomendada para jogar
@@ -52,8 +52,8 @@ public class Jogo {
 			String genero, 
 			Long tamanhoInstalador, 
 			Integer anoLancamento,
-			boolean multiplayer, 
-			boolean online, 
+			Boolean multiplayer, 
+			Boolean online, 
 			Integer classificaoIndicativa) {
 		super();
 		this.nome = nome;

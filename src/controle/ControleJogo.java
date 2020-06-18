@@ -88,14 +88,47 @@ public class ControleJogo {
 	 * sera feito uma busca por parte do que for informado,
 	 * se for informado o atributo tamanhoIntalador, anoLancamento,
 	 * classificaoIndicativa será feito busca absoluta
-	 * se Informado multiplay o online será feito busca por valor 
-	 * busca por 
+	 * se Informado multiplay o online será feito busca por valor  
 	 * @param jogo
 	 * @return
 	 */
 	public List<Jogo> pesquisarJogo(Jogo jogo){
+		List<Jogo> listaJogos = this.persistencia.getJogos();
 		
-		return null;
+		List<Jogo> listaResultado = filtraListaByAtributo(listaJogos, jogo.getNome(), "nome");
+		
+		listaResultado = filtraListaByAtributo(listaResultado, jogo.getGenero(), "genero");
+				
+		listaResultado = filtraListaByAtributo(listaResultado, jogo.getDescricao(), "descricao");
+		
+		listaResultado = filtraListaByAtributo(listaResultado, jogo.getAnoLancamento(), "anoLancamento");
+
+		
+		return listaResultado;
+	}
+
+	public List<Jogo> filtraListaByAtributo(List<Jogo> auxListaResultado, Object valor, String atributo) {
+		if(auxListaResultado.size() == 0) {
+			return auxListaResultado; 
+		}
+		
+		List<Jogo> listaResultado= new ArrayList<Jogo>();
+		if (valor != null && !valor.equals("")) {
+			for (Jogo auxJogo : auxListaResultado) {
+				if (
+					( atributo.equals("descricao") && auxJogo.getDescricao()!=null && auxJogo.getDescricao().contains((String) valor) ) ||
+					( atributo.equals("nome") && auxJogo.getNome()!=null && auxJogo.getNome().contains((String) valor) ) ||
+					( atributo.equals("genero") && auxJogo.getGenero()!=null && auxJogo.getGenero().contains((String) valor)) ||
+					( atributo.equals("anoLancamento") && auxJogo.getAnoLancamento()!=null && auxJogo.getAnoLancamento().equals(valor)) 
+						
+				) {
+					listaResultado.add(auxJogo);
+				}
+			}
+		}else {
+			listaResultado.addAll(auxListaResultado);
+		}
+		return listaResultado;
 	}
 	
 	/** 

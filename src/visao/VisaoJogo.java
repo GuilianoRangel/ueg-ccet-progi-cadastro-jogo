@@ -309,7 +309,18 @@ public class VisaoJogo {
 	}
 
 	private void pesquisarJogo() {
-		// TODO Auto-generated method stub
+		println("Preencha os atributos que deseja utilizar na pesquisa.");
+		Jogo jogoPesquisa = lerJogo(null);
+		
+		List<Jogo> pesquisarJogo = this.ctrl.pesquisarJogo(jogoPesquisa);
+		if (pesquisarJogo.size() > 0) {
+			println("Lista de Jogos encontrados");
+			println("------------------------------");
+			for (Jogo jogo : pesquisarJogo) {
+				imprimirJogo(jogo, true);
+				println("------------------------------");
+			}
+		}
 		
 	}
 
